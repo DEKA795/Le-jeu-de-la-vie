@@ -1,0 +1,50 @@
+from flask import Flask, render_template_string, request
+
+app = Flask(__name__)
+
+HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html lang=\"fr\">
+<head>
+    <meta charset=\"UTF-8\">
+    <title>Générateur Notion personnalisé</title>
+</head>
+<body>
+    <h1>Générateur de Plan Notion Personnalisé</h1>
+    <form method=\"POST\">
+        <label>Niveau actuel (0 à 100) :</label>
+        <input type=\"number\" name=\"niveau\" min=\"0\" max=\"100\" required>
+        <button type=\"submit\">Générer</button>
+    </form>
+
+    {% if output %}
+    <h2>Résultat :</h2>
+    <textarea rows=\"20\" cols=\"100\">{{ output }}</textarea>
+    {% endif %}
+</body>
+</html>
+"""
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    output = ""
+    if request.method == 'POST':
+        niveau = int(request.form['niveau'])
+        bench = 50 + niveau * 0.5
+        deadlift = 50 + niveau * 1.5
+        squat = 50 + niveau * 1
+        traction_leste = (niveau // 10) * 5
+        dips_leste = (niveau // 10) * 5
+        muscle_up = niveau // 10
+        temps_5km = 40*60 - niveau*12
+        min_5km, sec_5km = divmod(temps_5km, 60)
+        pompes = niveau
+        tractions = (niveau - 20) // 4 if niveau >= 20 else niveau
+        dips = (niveau - 10) // 3 if niveau >= 10 else niveau
+
+        output = f"""## Physique 💪\n\n- **Force** 💥\n  - *Bench - PR - lvl {niveau} : {bench} kg*\n  - *Deadlift - PR - lvl {niveau} : {deadlift} kg*\n  - *Squat - PR - lvl {niveau} : {squat} kg*\n\n  - *Streetlifting*\n    - *Tractions lestées - PR - lvl {niveau} : {traction_leste} kg*\n    - *Dips lestés - PR - lvl {niveau} : {dips_leste} kg*\n\n  - *Calisthenics figures*\n    - *Muscle up - NBR - lvl {niveau} : {muscle_up} cleans*\n\n- **Endurance** 🫁\n  - *Running*\n    - *5 km - MIN - lvl {niveau} : {int(min_5km)}min {int(sec_5km)}s*\n\n  - *Callisthénie*\n    - *Pompes - NBR - lvl {niveau} : {pompes} répétitions*\n    - *Tractions - NBR - lvl {niveau} : {tractions} répétitions*\n    - *Dips - NBR - lvl {niveau} : {dips} répétitions*\n"""
+
+    return render_template_string(HTML_TEMPLATE, output=output)
+
+if __name__ == '__main__':
+    app.run(debug=True)
